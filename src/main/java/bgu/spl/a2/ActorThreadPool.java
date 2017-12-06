@@ -2,6 +2,7 @@ package bgu.spl.a2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * methods
  */
 public class ActorThreadPool {
+    private final Object lock = new Object();
     private ConcurrentHashMap<String, Queue<Action>> actorsActions;
     private HashMap<String, PrivateState> actorsPrivateStates;
     private ConcurrentHashMap<String, AtomicBoolean> actorsLocks;
@@ -55,9 +57,16 @@ public class ActorThreadPool {
      * @param actorState actor's private state (actor's information)
      */
     public void submit(Action<?> action, String actorId, PrivateState actorState) {
-        // TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
+        synchronized (lock) {
+            if (actorsLocks.putIfAbsent(actorId, new AtomicBoolean()) == null) {
+                actorsActions.put(actorId, new LinkedList<>());
+                actorsPrivateStates.put(actorId, actorState);
+                monitor.inc();
+            }
+        }
+        actorsActions.get(actorId).add(action);
     }
+
 
     /**
      * closes the thread pool - this method interrupts all the threads and waits
@@ -69,8 +78,7 @@ public class ActorThreadPool {
      * @throws InterruptedException if the thread that shut down the threads is interrupted
      */
     public void shutdown() throws InterruptedException {
-        // TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
+        threads.forEach(Thread::interrupt);
     }
 
     /**
@@ -81,16 +89,14 @@ public class ActorThreadPool {
     }
 
     /**
-     * create the loop for this thread to wait until
+     * creates the loop for this thread to wait until
      * there is an unlocked actor with at least one action.
      */
     private void eventLoop() {
         while (true) {
-            findUnlockedActor();
             try {
-                monitor.await(monitor.getVersion());
+                findUnlockedActor();
             } catch (InterruptedException e) {
-                //todo: do something when interrupted
                 return;
             }
         }
@@ -102,7 +108,7 @@ public class ActorThreadPool {
      * meaning an actor which no thread is working on and has at least one action in his queue).
      * if found one-the function locks the actor and fetches an action.
      */
-    private void findUnlockedActor() {
+    private void findUnlockedActor() throws InterruptedException {
         String actorId = actorsLocks.search(actorsLocks.size(), ((id, lock) -> {
             if (!lock.compareAndSet(false, true)) {
                 return null;
@@ -110,19 +116,21 @@ public class ActorThreadPool {
             return id;
 
         }));
+        fetchAction(actorId);
+    }
+
+    private void fetchAction(String actorId) throws InterruptedException {
         if (actorId == null) {
-            return;
+            monitor.await(monitor.getVersion());
+        } else {
+
+            Action action = actorsActions.get(actorId).poll();
+            if (action == null) {
+                return;
+            }
+            action.handle(this,actorId,actorsPrivateStates.get(actorId));
+            monitor.inc();
         }
-        //todo: add function
-        monitor.inc();
-//        actorsLocks.forEach(((id, lock) -> {
-//            if (lock.compareAndSet(false, true)) {
-//                todo: add function
-//                monitor.inc();
-//            }
-
-
-//        }));
     }
 
 }

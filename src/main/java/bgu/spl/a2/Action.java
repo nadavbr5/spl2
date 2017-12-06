@@ -2,7 +2,6 @@ package bgu.spl.a2;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,6 +19,9 @@ public abstract class Action<R> {
     private Promise<R> promise;
     private ArrayList<Action<R>> actions;
     private callback callback;
+    private ActorThreadPool pool;
+    private String actionActor;
+    private PrivateState actionState;
 
     /**
      * start handling the action - note that this method is protected, a thread
@@ -38,9 +40,13 @@ public abstract class Action<R> {
      * the same package can access it - you should *not* change it to
      * public/private/protected
      */
-    /*package*/
-    final void handle() {
-
+    /*package*/ final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+        this.pool = pool;
+        this.actionActor = actorId;
+        this.actionState = actorState;
+        if (callback == null) {
+            start();
+        } else callback.call();
     }
 
 
@@ -55,11 +61,12 @@ public abstract class Action<R> {
      * @param callback the callback to execute once all the results are resolved
      */
     protected final void then(Collection<? extends Action<?>> actions, callback callback) {
+        this.callback = callback;
         AtomicInteger count = new AtomicInteger(actions.size());
-        actions.forEach((action) -> action.getResult().subscribe(() ->{
-            if (count.get()>0) {
+        actions.forEach((action) -> action.getResult().subscribe(() -> {
+            if (count.get() > 0) {
                 count.decrementAndGet();
-            }else callback.call();
+            } else sendMessage(this, actionActor, actionState);
         }));
     }
 
@@ -70,17 +77,14 @@ public abstract class Action<R> {
      * @param result - the action calculated result
      */
     protected final void complete(R result) {
-        //TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
-
+        promise.resolve(result);
     }
 
     /**
      * @return action's promise (result)
      */
     public final Promise<R> getResult() {
-        //TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
+        return promise;
     }
 
     /**
@@ -92,8 +96,8 @@ public abstract class Action<R> {
      * @return promise that will hold the result of the sent action
      */
     public Promise<?> sendMessage(Action<?> action, String actorId, PrivateState actorState) {
-        //TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
-    }
+        pool.submit(action,actorId,actorState);
+        return action.getResult();
 
+    }
 }
