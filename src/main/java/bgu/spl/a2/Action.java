@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <R> the action result type
  */
 public abstract class Action<R> {
-    private Promise<R> promise;
-    private ArrayList<Action<R>> actions;
-    private callback callback;
-    private ActorThreadPool pool;
-    private String actionActor;
-    private PrivateState actionState;
+    protected Promise<R> promise;
+    protected ArrayList<Action<R>> actions;
+    protected callback callback;
+    protected ActorThreadPool pool;
+    protected String actionActor;
+    protected PrivateState actionState;
 
     /**
      * start handling the action - note that this method is protected, a thread

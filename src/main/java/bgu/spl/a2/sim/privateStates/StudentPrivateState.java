@@ -7,41 +7,42 @@ import bgu.spl.a2.PrivateState;
 /**
  * this class describe student private state
  */
-public class StudentPrivateState extends PrivateState{
+public class StudentPrivateState extends PrivateState {
 
-	private HashMap<String, Integer> grades;
-	private long signature;
-	
-	/**
- 	 * Implementors note: you may not add other constructors to this class nor
-	 * you allowed to add any other parameter to this constructor - changing
-	 * this may cause automatic tests to fail..
-	 */
-	public StudentPrivateState() {
-		this.grades=new HashMap<>();
-		this.signature=0;
-	}
+    private HashMap<String, Integer> grades;
+    private long signature;
 
-	public HashMap<String, Integer> getGrades() {
-		return grades;
-	}
+    /**
+     * Implementors note: you may not add other constructors to this class nor
+     * you allowed to add any other parameter to this constructor - changing
+     * this may cause automatic tests to fail..
+     */
+    public StudentPrivateState() {
+        this.grades = new HashMap<>();
+        this.signature = 0;
+    }
 
-	public long getSignature() {
-		return signature;
-	}
+    public HashMap<String, Integer> getGrades() {
+        return grades;
+    }
 
-	public void setGrades(HashMap<String, Integer> grades) {
-		this.grades = grades;
-	}
+    public void setGrades(HashMap<String, Integer> grades) {
+        this.grades = grades;
+    }
 
-	public void setSignature(long signature) {
-		this.signature = signature;
-	}
+    public long getSignature() {
+        return signature;
+    }
 
-	public void addGrade(String course, Integer grade) {
-		this.grades.put(course, grade);
-	}
-	public void removeGrade(String course) {
-		this.grades.remove(course);
-	}
+    public void setSignature(long signature) {
+        this.signature = signature;
+    }
+
+    public void addGrade(String course, Integer grade) {
+        this.grades.put(course, grade);
+    }
+
+    public void removeGrade(String course) {
+        this.grades.remove(course);
+    }
 }
