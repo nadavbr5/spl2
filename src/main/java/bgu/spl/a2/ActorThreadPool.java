@@ -134,8 +134,4 @@ public class ActorThreadPool {
             monitor.inc();
         }
     }
-
-     PrivateState getPrivateStateByActor(String actor) {
-        return actorsPrivateStates.get(actor);
-    }
 }

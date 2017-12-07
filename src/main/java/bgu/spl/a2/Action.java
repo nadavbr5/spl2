@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Action<R> {
     protected Promise<R> promise;
-    protected ArrayList<Action<R>> actions;
+    protected ArrayList<Action> actions;
     protected callback callback;
     protected ActorThreadPool pool;
     protected String actionActor;
@@ -46,6 +46,7 @@ public abstract class Action<R> {
         this.actionState = actorState;
         if (callback == null) {
             start();
+            promise= new Promise<>();
         } else callback.call();
     }
 

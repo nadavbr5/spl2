@@ -13,23 +13,30 @@ import java.util.ArrayList;
  *
  */
 public class UnregisterAction extends Action<Boolean>{
-    private final String course;
     private final String student;
+    private final String course;
 
-    public UnregisterAction(String student, String course) {
+    public UnregisterAction(String student,String course) {
         this.student = student;
         this.course = course;
     }
 
     @Override
     protected void start() {
-        ArrayList<Action<Boolean>> actions= new ArrayList<>();
-        removeCourseFromStudentAction removeCourse = new removeCourseFromStudentAction(course);
-        actions.add(removeCourse);
-        sendMessage(removeCourse,student,new StudentPrivateState());
+        ArrayList<Action<?>> actions= new ArrayList<>();
+        Action removeCourseFromStudent=new Action<Boolean>(){
+            //in actor of a student
+            @Override
+            protected void start() {
+                ((StudentPrivateState) this.actionState).removeGrade(course);
+                complete(true);
+            }
+        };
+        actions.add(removeCourseFromStudent);
+        sendMessage(removeCourseFromStudent,student,new StudentPrivateState());
         then(actions,() -> {
-            ((CoursePrivateState)actionState).unregisterStudent(student);
-            complete(true);
+            boolean unregistered=((CoursePrivateState)actionState).unregisterStudent(student);
+            complete(unregistered);
         });
     }
 }

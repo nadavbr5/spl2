@@ -56,13 +56,17 @@ public class CoursePrivateState extends PrivateState {
         return prequisites;
     }
 
-    public void registerStudent(String student) {
-        if(regStudents.add(student))
+    public boolean registerStudent(String student) {
+        boolean added=regStudents.add(student);
+        if(added)
         this.availableSpots = this.availableSpots - 1;
+        return added;
     }
 
-    public void unregisterStudent(String student) {
-        if(regStudents.remove(student))
+    public boolean unregisterStudent(String student) {
+        boolean removed = regStudents.remove(student);
+        if(removed&&!availableSpots.equals(-1))
         this.availableSpots = this.availableSpots + 1;
+        return removed;
     }
 }
