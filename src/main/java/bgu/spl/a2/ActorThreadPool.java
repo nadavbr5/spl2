@@ -61,11 +61,12 @@ public class ActorThreadPool {
             if (actorsLocks.putIfAbsent(actorId, new AtomicBoolean()) == null) {
                 actorsActions.put(actorId, new LinkedList<>());
                 actorsPrivateStates.put(actorId, actorState);
-                monitor.inc();
             }
         }
         actorsActions.get(actorId).add(action);
+        monitor.inc();
     }
+
 
 
     /**
@@ -129,8 +130,12 @@ public class ActorThreadPool {
                 return;
             }
             action.handle(this,actorId,actorsPrivateStates.get(actorId));
+            actorsLocks.get(actorId).compareAndSet(true, false);
             monitor.inc();
         }
     }
 
+     PrivateState getPrivateStateByActor(String actor) {
+        return actorsPrivateStates.get(actor);
+    }
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 /**
  * @author nadav.
+ *
  */
 public class CloseCourseAction extends Action<Boolean> {
     private final String course;
@@ -19,5 +20,6 @@ public class CloseCourseAction extends Action<Boolean> {
     @Override
     protected void start() {
         ArrayList<Action<Boolean>> actions= new ArrayList<>();
+
     }
 }

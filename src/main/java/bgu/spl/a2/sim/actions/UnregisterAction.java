@@ -29,7 +29,6 @@ public class UnregisterAction extends Action<Boolean>{
         sendMessage(removeCourse,student,new StudentPrivateState());
         then(actions,() -> {
             ((CoursePrivateState)actionState).unregisterStudent(student);
-
             complete(true);
         });
     }
