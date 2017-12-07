@@ -42,7 +42,9 @@ public class StudentPrivateState extends PrivateState {
         this.grades.put(course, grade);
     }
 
-    public void removeGrade(String course) {
-        this.grades.remove(course);
+    public boolean removeGrade(String course) {
+       return (grades.remove(course) != null) ;
     }
+
+
 }

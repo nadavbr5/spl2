@@ -28,8 +28,7 @@ public class UnregisterAction extends Action<Boolean>{
             //in actor of a student
             @Override
             protected void start() {
-                ((StudentPrivateState) this.actionState).removeGrade(course);
-                complete(true);
+                complete(((StudentPrivateState) this.actionState).removeGrade(course));
             }
         };
         actions.add(removeCourseFromStudent);
