@@ -62,7 +62,7 @@ public class ActorThreadPool {
     public void submit(Action<?> action, String actorId, PrivateState actorState) {
         AtomicBoolean lock = new AtomicBoolean();
         AtomicBoolean actorLock = actorsLocks.putIfAbsent(actorId, lock);
-        if (ref.compareAndSet(null, actorLock)) {
+        if (ref.compareAndSet(actorLock, null)) {
             actorsActions.put(actorId, new ConcurrentLinkedQueue<>());
             actorsPrivateStates.put(actorId, actorState);
         }
