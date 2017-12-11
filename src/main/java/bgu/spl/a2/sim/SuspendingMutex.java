@@ -1,6 +1,10 @@
 package bgu.spl.a2.sim;
 import bgu.spl.a2.Promise;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 
  * this class is related to {@link Computer}
@@ -12,7 +16,7 @@ import bgu.spl.a2.Promise;
  */
 public class SuspendingMutex {
 	
-	
+
 	/**
 	 * Computer acquisition procedure
 	 * Note that this procedure is non-blocking and should return immediatly

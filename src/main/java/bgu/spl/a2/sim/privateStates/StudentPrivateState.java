@@ -38,8 +38,8 @@ public class StudentPrivateState extends PrivateState {
         this.signature = signature;
     }
 
-    public void addGrade(String course, Integer grade) {
-        this.grades.put(course, grade);
+    public boolean addGrade(String course, Integer grade) {
+       return this.grades.put(course, grade) == null;
     }
 
     public boolean removeGrade(String course) {
