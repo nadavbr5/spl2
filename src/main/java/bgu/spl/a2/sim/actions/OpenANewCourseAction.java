@@ -11,12 +11,12 @@ import java.util.List;
 /**
  * this action should be in department actor
  */
-public class OpenANewCoueseAction extends Action<Boolean> {
+public class OpenANewCourseAction extends Action<Boolean> {
 
     private final String courseName;
     private final CoursePrivateState coursePrivateState;
 
-    public OpenANewCoueseAction(String name, int availableSpots, List<String> prequisites) {
+    public OpenANewCourseAction(String name, int availableSpots, List<String> prequisites) {
         this.courseName = name;
         this.coursePrivateState = new CoursePrivateState();
         this.coursePrivateState.setAvailableSpots(availableSpots);
