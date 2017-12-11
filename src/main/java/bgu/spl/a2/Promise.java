@@ -84,7 +84,7 @@ public class Promise<T> {
         if (resolved.get()) {
             callback.call();
             callback = null;
-        }
+        }else
         callbackArrayList.add(callback);
     }
 }

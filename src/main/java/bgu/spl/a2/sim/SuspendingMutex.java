@@ -1,6 +1,10 @@
 package bgu.spl.a2.sim;
 import bgu.spl.a2.Promise;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 
  * this class is related to {@link Computer}
@@ -11,36 +15,51 @@ import bgu.spl.a2.Promise;
  *
  */
 public class SuspendingMutex {
-	
+	Computer computer;
+	AtomicBoolean lock;
+	ConcurrentLinkedQueue<Promise<Computer>> promises;
+
 	/**
 	 * Constructor
 	 * @param computer
 	 */
 	public SuspendingMutex(Computer computer){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		lock = new AtomicBoolean();
+		promises= new ConcurrentLinkedQueue<>();
+		this.computer= computer;
 	}
 	/**
 	 * Computer acquisition procedure
 	 * Note that this procedure is non-blocking and should return immediatly
-	 * 
-	 * @param computerType
+	 *
 	 * 					computer's type
 	 * 
 	 * @return a promise for the requested computer
 	 */
 	public Promise<Computer> down(){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		Promise<Computer> promise= new Promise<>();
+		if(lock.compareAndSet(false, true)){
+			try{
+				promise.resolve(computer);
+				return promise;
+			}finally {
+				up();
+			}
+		}
+		else{
+				this.promises.add(promise);
+				return promise;
+		}
 	}
 	/**
 	 * Computer return procedure
 	 * releases a computer which becomes available in the warehouse upon completion
-	 * 
-	 * @param computer
+	 *
 	 */
 	public void up(){
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		while (!this.promises.isEmpty()){
+			promises.poll().resolve(computer);
+		}
+		lock.compareAndSet(true,false);
 	}
 }
