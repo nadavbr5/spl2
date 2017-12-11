@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * represents an actor thread pool - to understand what this class does please
@@ -18,12 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * methods
  */
 public class ActorThreadPool {
-    private final Object lock = new Object();
     private ConcurrentHashMap<String, Queue<Action>> actorsActions;
     private HashMap<String, PrivateState> actorsPrivateStates;
     private ConcurrentHashMap<String, AtomicBoolean> actorsLocks;
     private ArrayList<Thread> threads;
     private VersionMonitor monitor;
+    private AtomicReference<AtomicBoolean> ref;
 
 
     /**
@@ -43,6 +45,7 @@ public class ActorThreadPool {
         actorsLocks = new ConcurrentHashMap<>();
         monitor = new VersionMonitor();
         threads = new ArrayList<>();
+        ref = new AtomicReference<>();
         for (int i = 0; i < nthreads; ++i) {
             threads.add(new Thread(this::eventLoop));
         }
@@ -57,16 +60,15 @@ public class ActorThreadPool {
      * @param actorState actor's private state (actor's information)
      */
     public void submit(Action<?> action, String actorId, PrivateState actorState) {
-        synchronized (lock) {
-            if (actorsLocks.putIfAbsent(actorId, new AtomicBoolean()) == null) {
-                actorsActions.put(actorId, new LinkedList<>());
-                actorsPrivateStates.put(actorId, actorState);
-            }
+        AtomicBoolean lock = new AtomicBoolean();
+        AtomicBoolean actorLock = actorsLocks.putIfAbsent(actorId, lock);
+        if (ref.compareAndSet(null, actorLock)) {
+            actorsActions.put(actorId, new ConcurrentLinkedQueue<>());
+            actorsPrivateStates.put(actorId, actorState);
         }
         actorsActions.get(actorId).add(action);
         monitor.inc();
     }
-
 
 
     /**
@@ -94,12 +96,8 @@ public class ActorThreadPool {
      * there is an unlocked actor with at least one action.
      */
     private void eventLoop() {
-        while (true) {
-            try {
-                findUnlockedActor();
-            } catch (InterruptedException e) {
-                return;
-            }
+        while (!Thread.currentThread().isInterrupted()) {
+            findUnlockedActor();
         }
 
     }
@@ -109,7 +107,7 @@ public class ActorThreadPool {
      * meaning an actor which no thread is working on and has at least one action in his queue).
      * if found one-the function locks the actor and fetches an action.
      */
-    private void findUnlockedActor() throws InterruptedException {
+    private void findUnlockedActor() {
         String actorId = actorsLocks.search(actorsLocks.size(), ((id, lock) -> {
             if (!lock.compareAndSet(false, true)) {
                 return null;
@@ -120,16 +118,19 @@ public class ActorThreadPool {
         fetchAction(actorId);
     }
 
-    private void fetchAction(String actorId) throws InterruptedException {
+    private void fetchAction(String actorId) {
         if (actorId == null) {
-            monitor.await(monitor.getVersion());
+            try {
+                monitor.await(monitor.getVersion());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         } else {
-
             Action action = actorsActions.get(actorId).poll();
             if (action == null) {
                 return;
             }
-            action.handle(this,actorId,actorsPrivateStates.get(actorId));
+            action.handle(this, actorId, actorsPrivateStates.get(actorId));
             actorsLocks.get(actorId).compareAndSet(true, false);
             monitor.inc();
         }
