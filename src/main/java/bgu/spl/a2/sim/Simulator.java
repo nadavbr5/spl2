@@ -17,6 +17,7 @@ public class Simulator {
 
 	
 	public static ActorThreadPool actorThreadPool;
+	public static Warehouse warehouse;
 	
 	/**
 	* Begin the simulation Should not be called before attachActorThreadPool()

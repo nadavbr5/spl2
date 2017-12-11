@@ -1,10 +1,6 @@
 package bgu.spl.a2.sim;
 import bgu.spl.a2.Promise;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * 
  * this class is related to {@link Computer}
@@ -16,7 +12,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SuspendingMutex {
 	
-
+	/**
+	 * Constructor
+	 * @param computer
+	 */
+	public SuspendingMutex(Computer computer){
+		//TODO: replace method body with real implementation
+		throw new UnsupportedOperationException("Not Implemented Yet.");
+	}
 	/**
 	 * Computer acquisition procedure
 	 * Note that this procedure is non-blocking and should return immediatly
@@ -26,7 +29,7 @@ public class SuspendingMutex {
 	 * 
 	 * @return a promise for the requested computer
 	 */
-	public Promise<Computer> down(String computerType){
+	public Promise<Computer> down(){
 		//TODO: replace method body with real implementation
 		throw new UnsupportedOperationException("Not Implemented Yet.");
 	}
@@ -36,7 +39,7 @@ public class SuspendingMutex {
 	 * 
 	 * @param computer
 	 */
-	public void up(Computer computer){
+	public void up(){
 		//TODO: replace method body with real implementation
 		throw new UnsupportedOperationException("Not Implemented Yet.");
 	}

@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Promise<T> {
     private final AtomicBoolean resolved = new AtomicBoolean();
     private T result;
-    private ArrayList<callback> callbackArrayList=new ArrayList<>();
+    private ArrayList<callback> callbackArrayList = new ArrayList<>();
 
 
     /**
@@ -30,10 +30,8 @@ public class Promise<T> {
      *                               not yet resolved
      */
     public T get() {
-        synchronized (resolved) {
-            if (!resolved.get()) {
-                throw new IllegalStateException();
-            }
+        if (!resolved.get()) {
+            throw new IllegalStateException();
         }
         return result;
     }
@@ -63,7 +61,10 @@ public class Promise<T> {
         if (!resolved.compareAndSet(false, true))
             throw new IllegalStateException();
         result = value;
-        callbackArrayList.forEach(callback::call);
+        callbackArrayList.forEach((callback -> {
+            callback.call();
+            callback = null;
+        }));
         callbackArrayList.clear();
     }
 
@@ -80,11 +81,10 @@ public class Promise<T> {
      * @param callback the callback to be called when the promise object is resolved
      */
     public void subscribe(callback callback) {
-        synchronized (resolved) {
-            if (resolved.get()) {
-                throw new IllegalStateException();
-            }
-            callbackArrayList.add(callback);
+        if (resolved.get()) {
+            callback.call();
+            callback = null;
         }
+        callbackArrayList.add(callback);
     }
 }
