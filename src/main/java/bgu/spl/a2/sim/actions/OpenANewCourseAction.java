@@ -25,6 +25,8 @@ public class OpenANewCourseAction extends Action<Boolean> {
 
     @Override
     protected void start() {
+        this.name = "Open Course";
+        actionState.addRecord(name);
         ArrayList<Action<?>> actions = new ArrayList<>();
         CreateNewActorAction createNewActorAction = new CreateNewActorAction();
         actions.add(createNewActorAction);

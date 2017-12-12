@@ -35,6 +35,7 @@ public class Simulator {
     public static Warehouse warehouse;
     private static Manager manager;
     private static Gson gson;
+    private static CountDownLatch count;
 
     /**
      * Begin the simulation Should not be called before attachActorThreadPool()
@@ -46,24 +47,70 @@ public class Simulator {
                     jsonObject.get("Sig Fail").getAsLong());
         }));
         actorThreadPool.start();
-        Action action;
-        switch (manager.Phase1.get(0).get("Action").getAsString()) {
-            case "Open Course": {
-                openCourse();
-            }
-        }
+        count = new CountDownLatch(manager.Phase1.size());
+        phase(manager.Phase1);
+
 
 
     }
 
-    private static Action<?> openCourse() {
+    private static void phase(ArrayList<JsonObject> phase) {
+        phase.forEach((jsonObject)->{
+            switch (jsonObject.get("Action").getAsString()) {
+                case "Open Course": {
+                    openCourse(jsonObject);
+                    break;
+                }
+                case "Add Student":{
+                    addStudent(jsonObject);
+                    break;
+                }
+                case "Participate In Course":{
+                    participateInCourse(jsonObject);
+                    break;
+                }
+                case "Add Spaces":{
+                    addSpaces(jsonObject);
+                    break;
+                }
+                case "Register With Preferences":{
+                    registerWithPereferences(jsonObject);
+                    break;
+                }
+                case "Unregister":{
+                    unregister(jsonObject);
+                    break;
+                }
+                case "Close Course":{
+                    closeCourse(jsonObject);
+                    break;
+                }
+                case "Administrative Check":{
+                    administrativeCheck(jsonObject);
+                    break;
+                }
+
+            }
+
+        });
+
+
+
+    }
+
+    private static void addStudent(JsonObject jsonObject) {
+
+    }
+
+    private static void openCourse(JsonObject jsonObject) {
         Action action;
-        String name = manager.Phase1.get(0).get("Course").getAsString();
-        String department = manager.Phase1.get(0).get("Department").getAsString();
-        int space = manager.Phase1.get(0).get("Space").getAsInt();
-        List prerequisites = gson.fromJson(manager.Phase1.get(0).get("Prerequisites"), List.class);
+        String name =jsonObject.get("Course").getAsString();
+        String department =jsonObject.get("Department").getAsString();
+        int space = jsonObject.get("Space").getAsInt();
+        List prerequisites = gson.fromJson(jsonObject.get("Prerequisites"), List.class);
         action = new OpenANewCourseAction(name, space, (List<String>) prerequisites);
-        return action;
+       actorThreadPool.submit(action,department,new DepartmentPrivateState());
+       action.getResult().subscribe(()->count.countDown());
     }
 
     /**

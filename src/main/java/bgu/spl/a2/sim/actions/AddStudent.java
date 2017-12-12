@@ -18,6 +18,8 @@ public class AddStudent extends Action<Boolean> {
     }
     @Override
     protected void start() {
+        this.name = "Add Student";
+        actionState.addRecord(name);
         ArrayList<Action<?>> actions = new ArrayList<>();
         CreateNewActorAction createNewActorAction = new CreateNewActorAction();
         actions.add(createNewActorAction);

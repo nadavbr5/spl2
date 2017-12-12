@@ -22,6 +22,7 @@ public abstract class Action<R> {
     protected ActorThreadPool pool;
     protected String actionActor;
     protected PrivateState actionState;
+    protected String name;
 
     /**
      * start handling the action - note that this method is protected, a thread
@@ -106,15 +107,13 @@ public abstract class Action<R> {
      * @param actionName
      */
     public void setActionName(String actionName){
-        //TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
+        this.name = actionName;
     }
 
     /**
      * @return action's name
      */
     public String getActionName(){
-        //TODO: replace method body with real implementation
-        throw new UnsupportedOperationException("Not Implemented Yet.");
+        return name;
     }
 }

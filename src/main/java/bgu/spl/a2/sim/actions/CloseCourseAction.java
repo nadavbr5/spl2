@@ -25,6 +25,8 @@ public class CloseCourseAction extends Action<Boolean> {
 
     @Override
     protected void start() {
+        this.name = "Close Course";
+        actionState.addRecord(name);
         ArrayList<Action<?>> actions = new ArrayList<>();
         Action getStudentList = new Action<List<String>>() {
             @Override

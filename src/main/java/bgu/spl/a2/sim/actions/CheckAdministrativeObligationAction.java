@@ -24,6 +24,8 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
 
     @Override
     protected void start() {
+        this.name = "Administrative Check";
+        actionState.addRecord(name);
         ArrayList<CheckAndSignAction> actions = new ArrayList<>();
         students.forEach((student) -> {
             CheckAndSignAction action = new CheckAndSignAction(computerType, courses);

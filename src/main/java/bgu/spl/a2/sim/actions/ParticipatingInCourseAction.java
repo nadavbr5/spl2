@@ -22,6 +22,8 @@ public class ParticipatingInCourseAction extends Action<Boolean>{
 
     @Override
     protected void start() {
+        this.name = "Participate In Course";
+        actionState.addRecord(name);
         ArrayList<Action<?>> actions= new ArrayList<>();
         List<String > pre = ((CoursePrivateState)this.actionState).getPrequisites();
         Action<Boolean> action = new Action<Boolean>() {

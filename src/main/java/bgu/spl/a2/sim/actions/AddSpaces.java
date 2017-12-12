@@ -17,6 +17,8 @@ public class AddSpaces extends Action<Boolean>{
 
     @Override
     protected void start() {
+        this.name="Add Spaces";
+        actionState.addRecord(name);
         Integer newAvailableSpots = ((CoursePrivateState) this.actionState).getAvailableSpots() + availableSpots;
         ((CoursePrivateState) this.actionState).setAvailableSpots(newAvailableSpots);
         complete(true);

@@ -22,6 +22,8 @@ public class UnregisterAction extends Action<Boolean>{
 
     @Override
     protected void start() {
+        this.name = "Unregister";
+        actionState.addRecord(name);
         ArrayList<Action<?>> actions= new ArrayList<>();
         Action removeCourseFromStudent=new Action<Boolean>(){
             //in actor of a student
