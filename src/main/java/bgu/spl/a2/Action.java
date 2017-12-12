@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <R> the action result type
  */
 public abstract class Action<R> {
-    protected Promise<R> promise;
+    protected final Promise<R> promise =new Promise<>();
     protected ArrayList<Action> actions;
     protected callback callback;
     protected ActorThreadPool pool;
@@ -44,9 +44,9 @@ public abstract class Action<R> {
         this.pool = pool;
         this.actionActor = actorId;
         this.actionState = actorState;
+        this.actions = new ArrayList<>();
         if (callback == null) {
             start();
-            promise= new Promise<>();
         } else callback.call();
     }
 
@@ -65,7 +65,7 @@ public abstract class Action<R> {
         this.callback = callback;
         AtomicInteger count = new AtomicInteger(actions.size());
         actions.forEach((action) -> action.getResult().subscribe(() -> {
-            if (count.get() > 0) {
+            if (count.get() > 1) {
                 count.decrementAndGet();
             } else sendMessage(this, actionActor, actionState);
         }));

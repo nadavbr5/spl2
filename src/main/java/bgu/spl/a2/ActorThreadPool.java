@@ -128,6 +128,7 @@ public class ActorThreadPool {
         } else {
             Action action = actorsActions.get(actorId).poll();
             if (action == null) {
+                actorsLocks.get(actorId).compareAndSet(true, false);
                 return;
             }
             action.handle(this, actorId, actorsPrivateStates.get(actorId));

@@ -61,11 +61,10 @@ public class Promise<T> {
         if (!resolved.compareAndSet(false, true))
             throw new IllegalStateException();
         result = value;
-        callbackArrayList.forEach((callback -> {
+        callbackArrayList.forEach(callback-> {
             callback.call();
             callback = null;
-        }));
-        callbackArrayList.clear();
+        });
     }
 
     /**
@@ -81,10 +80,11 @@ public class Promise<T> {
      * @param callback the callback to be called when the promise object is resolved
      */
     public void subscribe(callback callback) {
-        if (resolved.get()) {
+        if (!resolved.get()) {
+            callbackArrayList.add(callback);
+        }else {
             callback.call();
             callback = null;
-        }else
-        callbackArrayList.add(callback);
+        }
     }
 }

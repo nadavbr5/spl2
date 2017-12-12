@@ -28,11 +28,11 @@ public class OpenANewCourseAction extends Action<Boolean> {
         ArrayList<Action<?>> actions = new ArrayList<>();
         CreateNewActorAction createNewActorAction = new CreateNewActorAction();
         actions.add(createNewActorAction);
-        sendMessage(createNewActorAction, courseName, this.coursePrivateState);
         then(actions, () -> {
             ((DepartmentPrivateState) this.actionState).addCourse(courseName);
             complete((createNewActorAction.getResult().get()));
         });
+        sendMessage(createNewActorAction, courseName, this.coursePrivateState);
     }
 
 }
