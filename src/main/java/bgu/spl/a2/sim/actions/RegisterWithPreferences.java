@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author nadav.
- * this action should be in department actor
+ * this action should be in student actor
  */
 public class RegisterWithPreferences extends Action<Boolean> {
     private List<String> courses;
@@ -35,7 +35,7 @@ public class RegisterWithPreferences extends Action<Boolean> {
         if(courses.isEmpty())
             return false;
         String course = courses.remove(0);
-            Integer grade = grades.remove(0);
+            Integer grade =grades.remove(0);
             ParticipatingInCourseAction action = new ParticipatingInCourseAction(student, grade);
             sendMessage(action, course, new CoursePrivateState());
             action.getResult().subscribe(()->{

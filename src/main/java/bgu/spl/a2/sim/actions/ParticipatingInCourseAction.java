@@ -15,7 +15,7 @@ public class ParticipatingInCourseAction extends Action<Boolean>{
     private String studentName;
     private int grade;
 
-    ParticipatingInCourseAction(String studentName, int grade){
+    public ParticipatingInCourseAction(String studentName, int grade){
         this.studentName=studentName;
         this.grade=grade;
     }

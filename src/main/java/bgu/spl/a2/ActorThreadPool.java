@@ -1,9 +1,6 @@
 package bgu.spl.a2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -92,6 +89,22 @@ public class ActorThreadPool {
     }
 
     /**
+     * getter for actors
+     * @return actors
+     */
+    public HashMap<String, PrivateState> getPrivateStates(){
+        return actorsPrivateStates;
+    }
+    /**
+     * getter for actor's private state
+     * @param actorId actor's id
+     * @return actor's private state
+     */
+    public PrivateState getPrivateState(String actorId){
+       return actorsPrivateStates.get(actorId);
+    }
+
+    /**
      * creates the loop for this thread to wait until
      * there is an unlocked actor with at least one action.
      */
@@ -108,32 +121,26 @@ public class ActorThreadPool {
      * if found one-the function locks the actor and fetches an action.
      */
     private void findUnlockedActor() {
-        String actorId = actorsLocks.search(actorsLocks.size(), ((id, lock) -> {
-            if (!lock.compareAndSet(false, true)) {
-                return null;
+        for (String actorId: actorsLocks.keySet()) {
+            if (actorsLocks.get(actorId).compareAndSet(false, true)&&!actorsActions.get(actorId).isEmpty()) {
+                fetchAction(actorId);
+                return;
             }
-            return id;
-
-        }));
-        fetchAction(actorId);
-    }
-
-    private void fetchAction(String actorId) {
-        if (actorId == null) {
+            else {
+                actorsLocks.get(actorId).compareAndSet(true, false);
+            }
             try {
                 monitor.await(monitor.getVersion());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-        } else {
+        }
+    }
+
+    private void fetchAction(String actorId) {
             Action action = actorsActions.get(actorId).poll();
-            if (action == null) {
-                actorsLocks.get(actorId).compareAndSet(true, false);
-                return;
-            }
             action.handle(this, actorId, actorsPrivateStates.get(actorId));
             actorsLocks.get(actorId).compareAndSet(true, false);
             monitor.inc();
-        }
     }
 }
