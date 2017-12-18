@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
@@ -50,7 +51,6 @@ public class Simulator {
         count = new CountDownLatch(manager.Phase1.size());
         phase(manager.Phase1);
         System.out.println("after phase 1");
-        //todo remove the -1
         count = new CountDownLatch(manager.Phase2.size());
         phase(manager.Phase2);
         System.out.println("after phase 2");
@@ -65,6 +65,7 @@ public class Simulator {
             fout = new FileOutputStream("result.ser");
             oos = new ObjectOutputStream(fout);
             oos.writeObject(SimulationResult);
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -86,34 +87,42 @@ public class Simulator {
             switch (jsonObject.get("Action").getAsString()) {
                 case "Open Course": {
                     openCourse(jsonObject);
+                    System.out.println("started Open Course");
                     break;
                 }
                 case "Add Student": {
                     addStudent(jsonObject);
+                    System.out.println("started Add Student");
                     break;
                 }
                 case "Participate In Course": {
                     participateInCourse(jsonObject);
+                    System.out.println("started Participate In Course");
                     break;
                 }
                 case "Add Spaces": {
                     addSpaces(jsonObject);
+                    System.out.println("started Add Spaces");
                     break;
                 }
                 case "Register With Preferences": {
                     registerWithPreferences(jsonObject);
+                    System.out.println("started Register With Preferences");
                     break;
                 }
                 case "Unregister": {
                     unregister(jsonObject);
+                    System.out.println("started Unregister");
                     break;
                 }
                 case "Close Course": {
                     closeCourse(jsonObject);
+                    System.out.println("started Close Course");
                     break;
                 }
                 case "Administrative Check": {
                     administrativeCheck(jsonObject);
+                    System.out.println("started Administrative Check");
                     break;
                 }
 
@@ -121,7 +130,8 @@ public class Simulator {
 
         });
         try {
-            count.await();
+            if (count.getCount() > 0)
+                count.await();
         } catch (InterruptedException e) {
         }
 
@@ -134,42 +144,58 @@ public class Simulator {
         String computerType = jsonObject.get("Computer").getAsString();
         List conditions = gson.fromJson(jsonObject.get("Conditions"), List.class);
         CheckAdministrativeObligationAction action = new CheckAdministrativeObligationAction(students, computerType, conditions);
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Administrative Check");
+        });
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> count.countDown());
     }
 
     private static void closeCourse(JsonObject jsonObject) {
         String course = jsonObject.get("Course").getAsString();
         String department = jsonObject.get("Department").getAsString();
         CloseCourseAction action = new CloseCourseAction(course, department);
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Close Course");
+        });
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> count.countDown());
     }
 
     private static void unregister(JsonObject jsonObject) {
         String student = jsonObject.get("Student").getAsString();
         String course = jsonObject.get("Course").getAsString();
         UnregisterAction action = new UnregisterAction(student, course);
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Unregister");
+        });
         actorThreadPool.submit(action, course, new CoursePrivateState());
-        action.getResult().subscribe(() -> count.countDown());
     }
 
     private static void registerWithPreferences(JsonObject jsonObject) {
         String student = jsonObject.get("Student").getAsString();
         List preferences = gson.fromJson(jsonObject.get("Preferences"), List.class);
-        Type type = new TypeToken<ArrayList<Integer>>(){}.getType();
+        Type type = new TypeToken<ArrayList<Integer>>() {
+        }.getType();
         List<Integer> grades = gson.fromJson(jsonObject.get("Grade"), type);
         RegisterWithPreferences action = new RegisterWithPreferences(student, preferences, grades);
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Register With Preferences");
+        });
         actorThreadPool.submit(action, student, new StudentPrivateState());
-        action.getResult().subscribe(() -> count.countDown());
     }
 
     private static void addSpaces(JsonObject jsonObject) {
         String course = jsonObject.get("Course").getAsString();
         Integer number = jsonObject.get("Number").getAsInt();
         AddSpaces action = new AddSpaces(number);
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Add Spaces");
+        });
         actorThreadPool.submit(action, course, new CoursePrivateState());
-        action.getResult().subscribe(() -> count.countDown());
     }
 
     private static void participateInCourse(JsonObject jsonObject) {
@@ -179,7 +205,10 @@ public class Simulator {
         Integer grade = (grades.get(0).equals("-") ? 0 : Integer.parseInt(grades.get(0)));
         ParticipatingInCourseAction participating = new ParticipatingInCourseAction(student, grade);
         actorThreadPool.submit(participating, course, new CoursePrivateState());
-        participating.getResult().subscribe(() -> count.countDown());
+        participating.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Participate In Course");
+        });
 
     }
 
@@ -188,7 +217,10 @@ public class Simulator {
         String studentName = jsonObject.get("Student").getAsString();
         AddStudent action = new AddStudent(studentName);
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> count.countDown());
+        action.getResult().subscribe(() -> {
+            count.countDown();
+            System.out.println("finished Add Student");
+        });
     }
 
     private static void openCourse(JsonObject jsonObject) {
@@ -199,7 +231,9 @@ public class Simulator {
         List prerequisites = gson.fromJson(jsonObject.get("Prerequisites"), List.class);
         OpenANewCourseAction action = new OpenANewCourseAction(course, space, (List<String>) prerequisites);
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> count.countDown());
+        action.getResult().subscribe(() -> {count.countDown();
+            System.out.println("finished Open Course");
+        });
     }
 
     /**
@@ -227,7 +261,8 @@ public class Simulator {
         return actorThreadPool.getPrivateStates();
     }
 
-    public static int main(String[] args) {
+    public static void main(String[] args) {
+        //todo change back to int
         gson = new Gson();
         JsonReader reader = null;
         try {
@@ -239,9 +274,8 @@ public class Simulator {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        finally {
-            if (reader!=null) {
+        } finally {
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -249,7 +283,7 @@ public class Simulator {
                 }
             }
         }
-        return 0;
+//        return 0;
     }
 
     private static class Manager {

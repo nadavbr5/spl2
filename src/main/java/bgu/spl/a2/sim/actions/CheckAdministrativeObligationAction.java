@@ -37,7 +37,6 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
             actions.forEach((action) -> {
                 if (!action.getResult().get()) {
                     ans.compareAndSet(true, false);
-                    return;
                 }
 
             });

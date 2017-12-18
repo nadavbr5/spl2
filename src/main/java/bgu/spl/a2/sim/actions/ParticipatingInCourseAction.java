@@ -34,12 +34,13 @@ public class ParticipatingInCourseAction extends Action<Boolean>{
         };
         actions.add(action);
         sendMessage(action,studentName,new StudentPrivateState());
-        then(actions,()-> addStudentToCourse(actions, action));
+        then(actions,()-> addStudentToCourse(action));
     }
 
-    private void addStudentToCourse(ArrayList<Action<?>> actions, Action<Boolean> action) {
+    private void addStudentToCourse(Action<Boolean> action) {
         if (action.getResult().get() && ((CoursePrivateState) this.actionState).registerStudent(studentName)) {
             String course = this.actionActor;
+            ArrayList<Action<?>> actions=new ArrayList<>();
             Action<Boolean> addGradeInStudentAction = new Action<Boolean>() {
                 @Override
                 protected void start() {
@@ -51,7 +52,7 @@ public class ParticipatingInCourseAction extends Action<Boolean>{
    then(actions,()->{
        complete(addGradeInStudentAction.getResult().get());
    });
-}
+}else complete(false);
     }
 
 

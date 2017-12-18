@@ -35,13 +35,13 @@ public class CheckAndSignAction extends Action<Boolean> {
                 @Override
                 protected void start() {
                     ((StudentPrivateState) this.actionState).setSignature(sig.get());
-                    complete(true);
+                    this.complete(true);
                 }
             };
             sendMessage(setSignature, this.actionActor, new StudentPrivateState());
             ArrayList<Action<?>> actions = new ArrayList<>();
             actions.add((setSignature));
-            then(actions,()->{complete((Boolean) setSignature.getResult().get());});
+            then(actions,()-> complete((Boolean) setSignature.getResult().get()));
         });
     }
 }

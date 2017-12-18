@@ -203,7 +203,6 @@ public class ActorThreadPoolTest {
             Action<Boolean> confAction = new Confirmation(amount, sender, receiver,
                     receiverBank, new BankStates());
             actions.add(confAction);
-            sendMessage(confAction, receiverBank, new BankStates());
             then(actions, () -> {
                 Boolean result = actions.get(0).getResult().get();
                 if (result) {
@@ -215,6 +214,7 @@ public class ActorThreadPoolTest {
                 }
 
             });
+            sendMessage(confAction, receiverBank, new BankStates());
         }
     }
 

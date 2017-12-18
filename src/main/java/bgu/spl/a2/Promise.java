@@ -1,6 +1,7 @@
 package bgu.spl.a2;
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -20,7 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Promise<T> {
     private final AtomicBoolean resolved = new AtomicBoolean();
     private T result;
-    private ArrayList<callback> callbackArrayList = new ArrayList<>();
+    private AtomicBoolean lock=new AtomicBoolean();
+    private ConcurrentLinkedQueue<callback> callbackArrayList = new ConcurrentLinkedQueue<>();
 
 
     /**
@@ -80,11 +82,11 @@ public class Promise<T> {
      * @param callback the callback to be called when the promise object is resolved
      */
     public void subscribe(callback callback) {
-        if (!resolved.get()) {
-            callbackArrayList.add(callback);
-        }else {
+        if (resolved.get()) {
             callback.call();
             callback = null;
+        } else {
+            callbackArrayList.add(callback);
         }
     }
 }

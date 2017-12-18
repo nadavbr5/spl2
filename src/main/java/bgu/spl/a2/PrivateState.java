@@ -1,5 +1,6 @@
 package bgu.spl.a2;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * an abstract class that represents private states of an actor
  * it holds actions that the actor has executed so far 
  */
-public abstract class PrivateState {
+public abstract class PrivateState implements Serializable {
 	
 	// holds the actions' name what were executed
 	private List<String> history=new ArrayList<>();
