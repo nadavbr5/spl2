@@ -46,17 +46,13 @@ public class Simulator {
                     jsonObject.get("Sig Success").getAsLong(),
                     jsonObject.get("Sig Fail").getAsLong());
         }));
-        System.out.println("created the computers");
         actorThreadPool.start();
         count = new CountDownLatch(manager.Phase1.size());
         phase(manager.Phase1);
-        System.out.println("after phase 1");
         count = new CountDownLatch(manager.Phase2.size());
         phase(manager.Phase2);
-        System.out.println("after phase 2");
         count = new CountDownLatch(manager.Phase3.size());
         phase(manager.Phase3);
-        System.out.println("after phase 3");
         HashMap<String, PrivateState> SimulationResult;
         SimulationResult = Simulator.end();
         FileOutputStream fout = null;
@@ -87,42 +83,34 @@ public class Simulator {
             switch (jsonObject.get("Action").getAsString()) {
                 case "Open Course": {
                     openCourse(jsonObject);
-                    System.out.println("started Open Course");
                     break;
                 }
                 case "Add Student": {
                     addStudent(jsonObject);
-                    System.out.println("started Add Student");
                     break;
                 }
                 case "Participate In Course": {
                     participateInCourse(jsonObject);
-                    System.out.println("started Participate In Course");
                     break;
                 }
                 case "Add Spaces": {
                     addSpaces(jsonObject);
-                    System.out.println("started Add Spaces");
                     break;
                 }
                 case "Register With Preferences": {
                     registerWithPreferences(jsonObject);
-                    System.out.println("started Register With Preferences");
                     break;
                 }
                 case "Unregister": {
                     unregister(jsonObject);
-                    System.out.println("started Unregister");
                     break;
                 }
                 case "Close Course": {
                     closeCourse(jsonObject);
-                    System.out.println("started Close Course");
                     break;
                 }
                 case "Administrative Check": {
                     administrativeCheck(jsonObject);
-                    System.out.println("started Administrative Check");
                     break;
                 }
 
@@ -130,8 +118,7 @@ public class Simulator {
 
         });
         try {
-            if (count.getCount() > 0)
-                count.await();
+            count.await(20,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
         }
 
@@ -146,7 +133,6 @@ public class Simulator {
         CheckAdministrativeObligationAction action = new CheckAdministrativeObligationAction(students, computerType, conditions);
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Administrative Check");
         });
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
     }
@@ -157,7 +143,6 @@ public class Simulator {
         CloseCourseAction action = new CloseCourseAction(course, department);
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Close Course");
         });
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
     }
@@ -168,7 +153,6 @@ public class Simulator {
         UnregisterAction action = new UnregisterAction(student, course);
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Unregister");
         });
         actorThreadPool.submit(action, course, new CoursePrivateState());
     }
@@ -182,7 +166,6 @@ public class Simulator {
         RegisterWithPreferences action = new RegisterWithPreferences(student, preferences, grades);
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Register With Preferences");
         });
         actorThreadPool.submit(action, student, new StudentPrivateState());
     }
@@ -193,7 +176,6 @@ public class Simulator {
         AddSpaces action = new AddSpaces(number);
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Add Spaces");
         });
         actorThreadPool.submit(action, course, new CoursePrivateState());
     }
@@ -207,7 +189,6 @@ public class Simulator {
         actorThreadPool.submit(participating, course, new CoursePrivateState());
         participating.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Participate In Course");
         });
 
     }
@@ -219,7 +200,6 @@ public class Simulator {
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
         action.getResult().subscribe(() -> {
             count.countDown();
-            System.out.println("finished Add Student");
         });
     }
 
@@ -232,7 +212,6 @@ public class Simulator {
         OpenANewCourseAction action = new OpenANewCourseAction(course, space, (List<String>) prerequisites);
         actorThreadPool.submit(action, department, new DepartmentPrivateState());
         action.getResult().subscribe(() -> {count.countDown();
-            System.out.println("finished Open Course");
         });
     }
 

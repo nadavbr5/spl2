@@ -1,8 +1,8 @@
 package bgu.spl.a2;
 
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicMarkableReference;
 
 /**
  * this class represents a deferred result i.e., an object that eventually will
@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Promise<T> {
     private final AtomicBoolean resolved = new AtomicBoolean();
     private T result;
-    private AtomicBoolean lock=new AtomicBoolean();
-    private ConcurrentLinkedQueue<callback> callbackArrayList = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<callback> callbackList = new ConcurrentLinkedQueue<>();
+    AtomicMarkableReference<T> result1= new AtomicMarkableReference<>(null, false);
 
 
     /**
@@ -63,10 +63,7 @@ public class Promise<T> {
         if (!resolved.compareAndSet(false, true))
             throw new IllegalStateException();
         result = value;
-        callbackArrayList.forEach(callback-> {
-            callback.call();
-            callback = null;
-        });
+        callbackList.forEach(callback::call);
     }
 
     /**
@@ -84,9 +81,8 @@ public class Promise<T> {
     public void subscribe(callback callback) {
         if (resolved.get()) {
             callback.call();
-            callback = null;
-        } else {
-            callbackArrayList.add(callback);
         }
+        else
+            callbackList.add(callback);
     }
 }

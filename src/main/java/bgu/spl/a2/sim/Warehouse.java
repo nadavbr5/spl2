@@ -22,7 +22,11 @@ public class Warehouse {
         return this.computers.put(type,suspendingMutex) == null;
     }
 
-    public Promise<Computer> checkAndSign(String computerType){
+    public Promise<Computer> down(String computerType){
          return computers.get(computerType).down();
+    }
+
+    public void up(String computerType) {
+        computers.get(computerType).up();
     }
 }

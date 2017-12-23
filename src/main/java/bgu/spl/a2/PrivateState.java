@@ -9,7 +9,7 @@ import java.util.List;
  * it holds actions that the actor has executed so far 
  */
 public abstract class PrivateState implements Serializable {
-	
+
 	// holds the actions' name what were executed
 	private List<String> history=new ArrayList<>();
 

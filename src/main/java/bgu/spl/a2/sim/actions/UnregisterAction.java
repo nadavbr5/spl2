@@ -24,8 +24,8 @@ public class UnregisterAction extends Action<Boolean>{
     protected void start() {
         this.name = "Unregister";
         actionState.addRecord(name);
-        ArrayList<Action<?>> actions= new ArrayList<>();
-        Action removeCourseFromStudent=new Action<Boolean>(){
+        ArrayList<Action<Boolean>> actions= new ArrayList<>();
+        Action<Boolean> removeCourseFromStudent=new Action<Boolean>(){
             //in actor of a student
             @Override
             protected void start() {
@@ -33,10 +33,14 @@ public class UnregisterAction extends Action<Boolean>{
             }
         };
         actions.add(removeCourseFromStudent);
-        sendMessage(removeCourseFromStudent,student,new StudentPrivateState());
         then(actions,() -> {
-            boolean unregistered=((CoursePrivateState)actionState).unregisterStudent(student);
-            complete(unregistered);
+//            if(!removeCourseFromStudent.getResult().get())
+//                sendMessage(this, this.actionActor, new CoursePrivateState());
+//            else {
+                boolean unregistered = ((CoursePrivateState) actionState).unregisterStudent(student);
+                complete(unregistered);
+//            }
         });
+        sendMessage(removeCourseFromStudent,student,new StudentPrivateState());
     }
 }

@@ -66,13 +66,11 @@ public abstract class Action<R> {
         AtomicInteger count = new AtomicInteger(actions.size());
         if (actions.isEmpty()) {
             callback.call();
-            callback = null;
             return;
         }
         actions.forEach((action) -> action.getResult().subscribe(() -> {
-            if (count.get() > 1) {
-                count.decrementAndGet();
-            } else sendMessage(this, actionActor, actionState);
+            if (count.getAndDecrement() == 1)
+                sendMessage(this, actionActor, actionState);
         }));
     }
 

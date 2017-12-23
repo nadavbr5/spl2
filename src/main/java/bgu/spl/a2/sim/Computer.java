@@ -27,7 +27,6 @@ public class Computer {
 		courses.forEach((course)-> {
 			if(!(coursesGrades.get(course)!=null &&coursesGrades.get(course)>=56))
 			ans.compareAndSet(true,false);
-			return;
 		});
 
 		return (ans.get() ? successSig : failSig);
@@ -39,5 +38,9 @@ public class Computer {
 
 	public void setSuccessSig(long successSig) {
 		this.successSig = successSig;
+	}
+
+	public String getComputerType() {
+		return computerType;
 	}
 }

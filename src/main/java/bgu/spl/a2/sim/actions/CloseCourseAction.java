@@ -37,17 +37,15 @@ public class CloseCourseAction extends Action<Boolean> {
             }
         };
         actions.add(getStudentList);
-        sendMessage(getStudentList, course, new CoursePrivateState());
         then(actions, () -> {
             List<String> studentList = (List<String>) getStudentList.getResult().get();
             if (studentList == null) {
                 complete(false);
                 return;
             }
-            ArrayList<Action<?>> unregisterActions = new ArrayList<>();
+            ArrayList<UnregisterAction> unregisterActions = new ArrayList<>();
             studentList.forEach((student) -> {
                 UnregisterAction unregister = new UnregisterAction(student, course);
-                sendMessage(unregister, course, new CoursePrivateState());
                 unregisterActions.add(unregister);
             });
             then(unregisterActions, () -> {
@@ -55,6 +53,8 @@ public class CloseCourseAction extends Action<Boolean> {
                 unregisterActions.forEach((action -> flag.compareAndSet(true, (Boolean) action.getResult().get())));
                 complete(flag.get());
             });
+            actions.forEach((unregister)->sendMessage(unregister, course, new CoursePrivateState()));
         });
+        sendMessage(getStudentList, course, new CoursePrivateState());
     }
 }

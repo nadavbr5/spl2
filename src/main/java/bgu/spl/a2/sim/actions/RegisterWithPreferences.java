@@ -37,13 +37,13 @@ public class RegisterWithPreferences extends Action<Boolean> {
         String course = courses.remove(0);
             Integer grade =grades.remove(0);
             ParticipatingInCourseAction action = new ParticipatingInCourseAction(student, grade);
-            sendMessage(action, course, new CoursePrivateState());
-            action.getResult().subscribe(()->{
-                if (action.getResult().get()) {
-                    registered.compareAndSet(false, true);
-                }else
-                    tryToRegister(registered);
-            });
+        action.getResult().subscribe(()->{
+            if (action.getResult().get()) {
+                registered.compareAndSet(false, true);
+            }else
+                tryToRegister(registered);
+        });
+        sendMessage(action, course, new CoursePrivateState());
         return registered.get();
     }
 }

@@ -87,11 +87,7 @@
       "Student": "123456789",
       "Course": "Data Bases"
     },
-    {
-      "Action": "Close Course",
-      "Department": "CS",
-      "Course": "Data Bases"
-    },
+
     {
       "Action": "Administrative Check",
       "Department": "CS",
@@ -108,6 +104,78 @@
   ],
   "Phase 3": [
     {
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
+      "Action": "Administrative Check",
+      "Department": "CS",
+      "Students": [
+        "123456789",
+        "5959595959"
+      ],
+      "Computer": "A",
+      "Conditions": [
+        "SPL",
+        "Data Bases"
+      ]
+    },{
       "Action": "Administrative Check",
       "Department": "CS",
       "Students": [
