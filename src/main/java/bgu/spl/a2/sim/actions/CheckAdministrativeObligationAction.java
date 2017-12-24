@@ -9,24 +9,19 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * this action should be in department actor
  */
 public class CheckAdministrativeObligationAction extends Action<Boolean> {
-    private List<String> students;
-    private String computerType;
-    private List<String> courses;
+    private List<String> Students;
+    private String Computer;
+    private List<String> Conditions;
     private ArrayList<HashMap<String, Integer>> gradesList;
     private ArrayList<Long> signaturesList;
 
-    public CheckAdministrativeObligationAction(List<String> students, String computerType, List<String> courses) {
-        this.students = students;
-        this.computerType = computerType;
-        this.courses = courses;
+    public CheckAdministrativeObligationAction() {
         gradesList = new ArrayList<>();
         signaturesList = new ArrayList<>();
 
@@ -37,7 +32,7 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
         this.name = "Administrative Check";
         actionState.addRecord(name);
         ArrayList<Action<HashMap<String, Integer>>> gradesActionsList = new ArrayList<>();
-        students.forEach((student) -> {
+        Students.forEach((student) -> {
             Action<HashMap<String, Integer>> getGrade = new Action<HashMap<String, Integer>>() {
                 @Override
                 protected void start() {
@@ -48,22 +43,22 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
         });
         then(gradesActionsList, () -> {
             gradesActionsList.forEach((action) -> gradesList.add(action.getResult().get()));
-            Promise<Computer> promise = Simulator.warehouse.down(computerType);
+            Promise<Computer> promise = Simulator.warehouse.down(Computer);
             promise.subscribe(() -> {
                 checkAndSign(promise);
             });
 
         });
         AtomicInteger i = new AtomicInteger();
-        students.forEach((student -> sendMessage(gradesActionsList.get(i.getAndIncrement()), student, new StudentPrivateState())));
+        Students.forEach((student -> sendMessage(gradesActionsList.get(i.getAndIncrement()), student, new StudentPrivateState())));
     }
 
     private void checkAndSign(Promise<Computer> promise) {
-        gradesList.forEach((map -> signaturesList.add(promise.get().checkAndSign(courses, map))));
+        gradesList.forEach((map -> signaturesList.add(promise.get().checkAndSign(Conditions, map))));
         Simulator.warehouse.up(promise.get().getComputerType());
         ArrayList<Action<Boolean>> actions = new ArrayList<>();
         AtomicInteger helper = new AtomicInteger();
-        students.forEach((student) -> {
+        Students.forEach((student) -> {
             Action<Boolean> setSignature = new Action<Boolean>() {
                 @Override
                 protected void start() {
@@ -79,7 +74,7 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
 
         });
         AtomicInteger i = new AtomicInteger();
-        students.forEach((student -> sendMessage(actions.get(i.getAndIncrement()), student, new StudentPrivateState())));
+        Students.forEach((student -> sendMessage(actions.get(i.getAndIncrement()), student, new StudentPrivateState())));
     }
 }
 

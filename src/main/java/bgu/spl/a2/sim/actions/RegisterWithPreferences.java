@@ -9,19 +9,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author nadav.
- * this action should be in student actor
+ * this action should be in Student actor
  */
 public class RegisterWithPreferences extends Action<Boolean> {
-    private List<String> courses;
-    private List<Integer> grades;
-    private String student;
+    private List<String> Preferences =new ArrayList<>();
+    private List<Integer> Grade =new ArrayList<>();
+    private String Student;
 
 
-    public RegisterWithPreferences(String student, List<String> courses, List<Integer> grades) {
-        this.courses = courses;
-        this.grades = grades;
-        this.student = student;
-    }
+
     @Override
     protected void start() {
         this.name = "Register With Preferences";
@@ -32,11 +28,13 @@ public class RegisterWithPreferences extends Action<Boolean> {
     }
 
     private boolean tryToRegister(AtomicBoolean registered) {
-        if(courses.isEmpty())
+        if(Preferences.isEmpty())
             return false;
-        String course = courses.remove(0);
-            Integer grade =grades.remove(0);
-            ParticipatingInCourseAction action = new ParticipatingInCourseAction(student, grade);
+        String course = Preferences.remove(0);
+            Integer grade = Grade.remove(0);
+            ParticipatingInCourseAction action = new ParticipatingInCourseAction();
+        action.setStudent(Student);
+        action.setGrade(grade);
         action.getResult().subscribe(()->{
             if (action.getResult().get()) {
                 registered.compareAndSet(false, true);

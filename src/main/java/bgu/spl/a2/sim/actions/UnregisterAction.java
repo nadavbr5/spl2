@@ -5,20 +5,16 @@ import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author nadav.
- * this action should be in course actor
- *
+ * this action should be in Course actor
  */
-public class UnregisterAction extends Action<Boolean>{
-    private final String student;
-    private final String course;
-
-    public UnregisterAction(String student,String course) {
-        this.student = student;
-        this.course = course;
-    }
+public class UnregisterAction extends Action<Boolean> {
+    private String Student;
+    private String Course;
 
     @Override
     protected void start() {
@@ -26,21 +22,26 @@ public class UnregisterAction extends Action<Boolean>{
         actionState.addRecord(name);
         ArrayList<Action<Boolean>> actions= new ArrayList<>();
         Action<Boolean> removeCourseFromStudent=new Action<Boolean>(){
-            //in actor of a student
+            //in actor of a Student
             @Override
             protected void start() {
-                complete(((StudentPrivateState) this.actionState).removeGrade(course));
+                complete(((StudentPrivateState) this.actionState).removeGrade(Course));
             }
         };
         actions.add(removeCourseFromStudent);
         then(actions,() -> {
-//            if(!removeCourseFromStudent.getResult().get())
-//                sendMessage(this, this.actionActor, new CoursePrivateState());
-//            else {
-                boolean unregistered = ((CoursePrivateState) actionState).unregisterStudent(student);
+                boolean unregistered = ((CoursePrivateState) actionState).unregisterStudent(Student);
                 complete(unregistered);
 //            }
         });
-        sendMessage(removeCourseFromStudent,student,new StudentPrivateState());
+        sendMessage(removeCourseFromStudent, Student,new StudentPrivateState());
+    }
+
+    public void setStudent(String student) {
+        Student = student;
+    }
+
+    public void setCourse(String course) {
+        Course = course;
     }
 }

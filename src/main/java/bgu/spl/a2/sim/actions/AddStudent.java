@@ -11,11 +11,7 @@ import java.util.ArrayList;
  */
 
 public class AddStudent extends Action<Boolean> {
-    private final String studentName;
-
-    public AddStudent(String name) {
-        this.studentName = name;
-    }
+    private String Student;
 
     @Override
     protected void start() {
@@ -25,9 +21,9 @@ public class AddStudent extends Action<Boolean> {
         CreateNewActorAction createNewActorAction = new CreateNewActorAction();
         actions.add(createNewActorAction);
         then(actions, () -> {
-            ((DepartmentPrivateState) this.actionState).addStudent(studentName);
+            ((DepartmentPrivateState) this.actionState).addStudent(Student);
             complete((createNewActorAction.getResult().get()));
         });
-        sendMessage(createNewActorAction, studentName, new StudentPrivateState());
+        sendMessage(createNewActorAction, Student, new StudentPrivateState());
     }
 }

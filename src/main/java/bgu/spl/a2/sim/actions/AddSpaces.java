@@ -2,24 +2,20 @@ package bgu.spl.a2.sim.actions;
 import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 
-import java.lang.management.BufferPoolMXBean;
-
 /**
  * this class is in actor of course
  */
 
 public class AddSpaces extends Action<Boolean>{
-    private final Integer availableSpots;
+    private Integer Number;
 
-    public AddSpaces(int availableSpots){
-        this.availableSpots=availableSpots;
-    }
+
 
     @Override
     protected void start() {
         this.name="Add Spaces";
         actionState.addRecord(name);
-        Integer newAvailableSpots = ((CoursePrivateState) this.actionState).getAvailableSpots() + availableSpots;
+        Integer newAvailableSpots = ((CoursePrivateState) this.actionState).getAvailableSpots() + Number;
         ((CoursePrivateState) this.actionState).setAvailableSpots(newAvailableSpots);
         complete(true);
     }

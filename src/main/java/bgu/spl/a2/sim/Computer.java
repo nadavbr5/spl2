@@ -25,7 +25,7 @@ public class Computer {
 	public long checkAndSign(List<String> courses, Map<String, Integer> coursesGrades){
 		AtomicBoolean ans = new AtomicBoolean(true);
 		courses.forEach((course)-> {
-			if(!(coursesGrades.get(course)!=null &&coursesGrades.get(course)>=56))
+			 if(!(coursesGrades.get(course)!=null &&coursesGrades.get(course)>=56))
 			ans.compareAndSet(true,false);
 		});
 

@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package bgu.spl.a2.sim;
 
 import java.io.*;
@@ -13,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import bgu.spl.a2.Action;
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
 import bgu.spl.a2.sim.actions.*;
@@ -55,164 +52,84 @@ public class Simulator {
         phase(manager.Phase3);
         HashMap<String, PrivateState> SimulationResult;
         SimulationResult = Simulator.end();
-        FileOutputStream fout = null;
-        ObjectOutputStream oos = null;
-        try {
-            fout = new FileOutputStream("result.ser");
-            oos = new ObjectOutputStream(fout);
+        try (FileOutputStream fout= new FileOutputStream("result.ser");
+             ObjectOutputStream oos = new ObjectOutputStream(fout)){
             oos.writeObject(SimulationResult);
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (fout != null)
-                    fout.close();
-                if (oos != null)
-                    oos.close();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
         }
+
     }
+
 
     private static void phase(ArrayList<JsonObject> phase) {
         phase.forEach((jsonObject) -> {
+            Action action;
+            PrivateState privateState = null;
+            String actor = "";
             switch (jsonObject.get("Action").getAsString()) {
                 case "Open Course": {
-                    openCourse(jsonObject);
+                    actor = jsonObject.get("Department").getAsString();
+                    action = gson.fromJson(jsonObject, OpenANewCourseAction.class);
+                    privateState=new DepartmentPrivateState();
                     break;
                 }
                 case "Add Student": {
-                    addStudent(jsonObject);
+                    actor = jsonObject.get("Department").getAsString();
+                    action =gson.fromJson(jsonObject,AddStudent.class);
+                    privateState=new DepartmentPrivateState();
                     break;
                 }
                 case "Participate In Course": {
-                    participateInCourse(jsonObject);
+                    actor = jsonObject.get("Course").getAsString();
+                    action = gson.fromJson(jsonObject, ParticipatingInCourseAction.class);
+                    privateState=new CoursePrivateState();
                     break;
                 }
                 case "Add Spaces": {
-                    addSpaces(jsonObject);
+                    actor = jsonObject.get("Course").getAsString();
+                    action = gson.fromJson(jsonObject, AddSpaces.class);
+                    privateState=new CoursePrivateState();
                     break;
                 }
                 case "Register With Preferences": {
-                    registerWithPreferences(jsonObject);
+                    actor = jsonObject.get("Student").getAsString();
+                    action = gson.fromJson(jsonObject,RegisterWithPreferences.class);
+                    privateState=new StudentPrivateState();
                     break;
                 }
                 case "Unregister": {
-                    unregister(jsonObject);
+                    actor = jsonObject.get("Course").getAsString();
+                    action = gson.fromJson(jsonObject, UnregisterAction.class);
+                    privateState = new CoursePrivateState();
                     break;
                 }
                 case "Close Course": {
-                    closeCourse(jsonObject);
+                    action= gson.fromJson(jsonObject, CloseCourseAction.class);
+                    actor=jsonObject.get("Department").getAsString();
+                    privateState=new DepartmentPrivateState();
                     break;
                 }
                 case "Administrative Check": {
-                    administrativeCheck(jsonObject);
+                    actor = jsonObject.get("Department").getAsString();
+                     action = gson.fromJson(jsonObject, CheckAdministrativeObligationAction.class);
+                     privateState=new DepartmentPrivateState();
                     break;
-                }
+                }default:action=new CreateNewActorAction();
 
             }
-
+            action.getResult().subscribe(() -> {
+                count.countDown();
+            });
+            actorThreadPool.submit(action, actor, privateState);
         });
         try {
-            count.await(20,TimeUnit.SECONDS);
+            count.await();
         } catch (InterruptedException e) {
         }
 
 
-    }
-
-    private static void administrativeCheck(JsonObject jsonObject) {
-        String department = jsonObject.get("Department").getAsString();
-        List students = gson.fromJson(jsonObject.get("Students"), List.class);
-        String computerType = jsonObject.get("Computer").getAsString();
-        List conditions = gson.fromJson(jsonObject.get("Conditions"), List.class);
-        CheckAdministrativeObligationAction action = new CheckAdministrativeObligationAction(students, computerType, conditions);
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-        actorThreadPool.submit(action, department, new DepartmentPrivateState());
-    }
-
-    private static void closeCourse(JsonObject jsonObject) {
-        String course = jsonObject.get("Course").getAsString();
-        String department = jsonObject.get("Department").getAsString();
-        CloseCourseAction action = new CloseCourseAction(course, department);
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-        actorThreadPool.submit(action, department, new DepartmentPrivateState());
-    }
-
-    private static void unregister(JsonObject jsonObject) {
-        String student = jsonObject.get("Student").getAsString();
-        String course = jsonObject.get("Course").getAsString();
-        UnregisterAction action = new UnregisterAction(student, course);
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-        actorThreadPool.submit(action, course, new CoursePrivateState());
-    }
-
-    private static void registerWithPreferences(JsonObject jsonObject) {
-        String student = jsonObject.get("Student").getAsString();
-        List preferences = gson.fromJson(jsonObject.get("Preferences"), List.class);
-        Type type = new TypeToken<ArrayList<Integer>>() {
-        }.getType();
-        List<Integer> grades = gson.fromJson(jsonObject.get("Grade"), type);
-        RegisterWithPreferences action = new RegisterWithPreferences(student, preferences, grades);
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-        actorThreadPool.submit(action, student, new StudentPrivateState());
-    }
-
-    private static void addSpaces(JsonObject jsonObject) {
-        String course = jsonObject.get("Course").getAsString();
-        Integer number = jsonObject.get("Number").getAsInt();
-        AddSpaces action = new AddSpaces(number);
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-        actorThreadPool.submit(action, course, new CoursePrivateState());
-    }
-
-    private static void participateInCourse(JsonObject jsonObject) {
-        String student = jsonObject.get("Student").getAsString();
-        String course = jsonObject.get("Course").getAsString();
-        List<String> grades = gson.fromJson(jsonObject.get("Grade"), List.class);
-        Integer grade = (grades.get(0).equals("-") ? 0 : Integer.parseInt(grades.get(0)));
-        ParticipatingInCourseAction participating = new ParticipatingInCourseAction(student, grade);
-        actorThreadPool.submit(participating, course, new CoursePrivateState());
-        participating.getResult().subscribe(() -> {
-            count.countDown();
-        });
-
-    }
-
-    private static void addStudent(JsonObject jsonObject) {
-        String department = jsonObject.get("Department").getAsString();
-        String studentName = jsonObject.get("Student").getAsString();
-        AddStudent action = new AddStudent(studentName);
-        actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> {
-            count.countDown();
-        });
-    }
-
-    private static void openCourse(JsonObject jsonObject) {
-
-        String course = jsonObject.get("Course").getAsString();
-        String department = jsonObject.get("Department").getAsString();
-        int space = jsonObject.get("Space").getAsInt();
-        List prerequisites = gson.fromJson(jsonObject.get("Prerequisites"), List.class);
-        OpenANewCourseAction action = new OpenANewCourseAction(course, space, (List<String>) prerequisites);
-        actorThreadPool.submit(action, department, new DepartmentPrivateState());
-        action.getResult().subscribe(() -> {count.countDown();
-        });
     }
 
     /**
@@ -243,26 +160,15 @@ public class Simulator {
     public static void main(String[] args) {
         //todo change back to int
         gson = new Gson();
-        JsonReader reader = null;
-        try {
-            reader = new JsonReader(new FileReader(args[0]));
+        try( JsonReader reader=new JsonReader(new FileReader(args[0]))) {
             manager = gson.fromJson(reader, Manager.class);
             attachActorThreadPool(new ActorThreadPool(manager.threads));
             warehouse = new Warehouse();
             start();
 
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-//        return 0;
     }
 
     private static class Manager {

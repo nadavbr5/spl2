@@ -3,24 +3,22 @@ package bgu.spl.a2.sim.actions;
 
 import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
-import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author nadav.
- * this class is in actor of department
+ * this class is in actor of Department
  */
 public class CloseCourseAction extends Action<Boolean> {
-    private final String course;
-    private final String department;
+    private final String Course;
+    private final String Department;
 
     public CloseCourseAction(String course, String department) {
-        this.course = course;
-        this.department = department;
+        this.Course = course;
+        this.Department = department;
     }
 
     @Override
@@ -30,7 +28,7 @@ public class CloseCourseAction extends Action<Boolean> {
         ArrayList<Action<?>> actions = new ArrayList<>();
         Action getStudentList = new Action<List<String>>() {
             @Override
-            //in actor of course
+            //in actor of Course
             protected void start() {
                 ((CoursePrivateState) this.actionState).setAvailableSpots(-1);
                 complete(((CoursePrivateState) this.actionState).getRegStudents());
@@ -45,7 +43,9 @@ public class CloseCourseAction extends Action<Boolean> {
             }
             ArrayList<UnregisterAction> unregisterActions = new ArrayList<>();
             studentList.forEach((student) -> {
-                UnregisterAction unregister = new UnregisterAction(student, course);
+                UnregisterAction unregister = new UnregisterAction();
+                unregister.setCourse(Course);
+                unregister.setStudent(student);
                 unregisterActions.add(unregister);
             });
             then(unregisterActions, () -> {
@@ -53,8 +53,8 @@ public class CloseCourseAction extends Action<Boolean> {
                 unregisterActions.forEach((action -> flag.compareAndSet(true, (Boolean) action.getResult().get())));
                 complete(flag.get());
             });
-            actions.forEach((unregister)->sendMessage(unregister, course, new CoursePrivateState()));
+            actions.forEach((unregister)->sendMessage(unregister, Course, new CoursePrivateState()));
         });
-        sendMessage(getStudentList, course, new CoursePrivateState());
+        sendMessage(getStudentList, Course, new CoursePrivateState());
     }
 }

@@ -3,7 +3,6 @@ package bgu.spl.a2.sim.actions;
 import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
-import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +12,10 @@ import java.util.List;
  */
 public class OpenANewCourseAction extends Action<Boolean> {
 
-    private final String courseName;
-    private final CoursePrivateState coursePrivateState;
+    private String Course;
+    private Integer Space;
+    private List<String> Prerequisites = new ArrayList<>();
 
-    public OpenANewCourseAction(String name, int availableSpots, List<String> prequisites) {
-        this.courseName = name;
-        this.coursePrivateState = new CoursePrivateState();
-        this.coursePrivateState.setAvailableSpots(availableSpots);
-        this.coursePrivateState.setPrequisites(prequisites);
-    }
 
     @Override
     protected void start() {
@@ -29,12 +23,15 @@ public class OpenANewCourseAction extends Action<Boolean> {
         actionState.addRecord(name);
         ArrayList<Action<?>> actions = new ArrayList<>();
         CreateNewActorAction createNewActorAction = new CreateNewActorAction();
+        CoursePrivateState coursePrivateState=new CoursePrivateState();
+        coursePrivateState.setAvailableSpots(Space);
+        coursePrivateState.setPrequisites(Prerequisites);
         actions.add(createNewActorAction);
         then(actions, () -> {
-            ((DepartmentPrivateState) this.actionState).addCourse(courseName);
+            ((DepartmentPrivateState) this.actionState).addCourse(Course);
             complete((createNewActorAction.getResult().get()));
         });
-        sendMessage(createNewActorAction, courseName, this.coursePrivateState);
+        sendMessage(createNewActorAction, Course, coursePrivateState);
     }
 
 }
