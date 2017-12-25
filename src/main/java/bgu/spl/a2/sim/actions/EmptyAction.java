@@ -7,7 +7,7 @@ import bgu.spl.a2.sim.privateStates.CoursePrivateState;
  *
  */
 
-public class CreateNewActorAction extends Action<Boolean>{
+public class EmptyAction extends Action<Boolean>{
     @Override
     protected void start() {
     complete(true);

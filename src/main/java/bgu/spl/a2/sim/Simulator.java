@@ -2,12 +2,9 @@
 package bgu.spl.a2.sim;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import bgu.spl.a2.Action;
 import bgu.spl.a2.ActorThreadPool;
@@ -19,7 +16,6 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
 /**
@@ -116,7 +112,7 @@ public class Simulator {
                      action = gson.fromJson(jsonObject, CheckAdministrativeObligationAction.class);
                      privateState=new DepartmentPrivateState();
                     break;
-                }default:action=new CreateNewActorAction();
+                }default:action=new EmptyAction();
 
             }
             action.getResult().subscribe(() -> {
@@ -180,12 +176,5 @@ public class Simulator {
         private ArrayList<JsonObject> Phase2;
         @SerializedName("Phase 3")
         private ArrayList<JsonObject> Phase3;
-
-        public Manager() {
-            this.Computers = new ArrayList<>();
-            this.Phase1 = new ArrayList<>();
-            this.Phase2 = new ArrayList<>();
-            this.Phase3 = new ArrayList<>();
-        }
     }
 }

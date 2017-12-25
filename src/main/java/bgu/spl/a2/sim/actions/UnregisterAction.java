@@ -5,6 +5,8 @@ import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,21 +22,26 @@ public class UnregisterAction extends Action<Boolean> {
     protected void start() {
         this.name = "Unregister";
         actionState.addRecord(name);
-        ArrayList<Action<Boolean>> actions= new ArrayList<>();
-        Action<Boolean> removeCourseFromStudent=new Action<Boolean>(){
-            //in actor of a Student
-            @Override
-            protected void start() {
-                complete(((StudentPrivateState) this.actionState).removeGrade(Course));
+        EmptyAction waitUntilRegister = new EmptyAction();
+        then(Collections.singletonList(waitUntilRegister), () -> {
+            boolean unregistered = ((CoursePrivateState) actionState).unregisterStudent(Student);
+            if (!unregistered) {
+                complete(false);
+                return;
             }
-        };
-        actions.add(removeCourseFromStudent);
-        then(actions,() -> {
-                boolean unregistered = ((CoursePrivateState) actionState).unregisterStudent(Student);
-                complete(unregistered);
-//            }
+            Action<Boolean> removeCourseFromStudent = new Action<Boolean>() {
+                //in actor of a Student
+                @Override
+                protected void start() {
+                    complete(((StudentPrivateState) this.actionState).removeGrade(Course));
+                }
+            };
+            then(Collections.singletonList(removeCourseFromStudent), () -> {
+                complete(removeCourseFromStudent.getResult().get());
+            });
+            sendMessage(removeCourseFromStudent, Student, new StudentPrivateState());
         });
-        sendMessage(removeCourseFromStudent, Student,new StudentPrivateState());
+        sendMessage(waitUntilRegister, Student, new StudentPrivateState());
     }
 
     public void setStudent(String student) {

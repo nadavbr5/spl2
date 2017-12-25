@@ -18,12 +18,12 @@ public class AddStudent extends Action<Boolean> {
         this.name = "Add Student";
         actionState.addRecord(name);
         ArrayList<Action<?>> actions = new ArrayList<>();
-        CreateNewActorAction createNewActorAction = new CreateNewActorAction();
-        actions.add(createNewActorAction);
+        EmptyAction emptyAction = new EmptyAction();
+        actions.add(emptyAction);
         then(actions, () -> {
             ((DepartmentPrivateState) this.actionState).addStudent(Student);
-            complete((createNewActorAction.getResult().get()));
+            complete((emptyAction.getResult().get()));
         });
-        sendMessage(createNewActorAction, Student, new StudentPrivateState());
+        sendMessage(emptyAction, Student, new StudentPrivateState());
     }
 }

@@ -62,7 +62,7 @@ public class CheckAdministrativeObligationAction extends Action<Boolean> {
             Action<Boolean> setSignature = new Action<Boolean>() {
                 @Override
                 protected void start() {
-                    ((StudentPrivateState) this.actionState).setSignature(helper.getAndIncrement());
+                    ((StudentPrivateState) this.actionState).setSignature(signaturesList.get(helper.getAndIncrement()));
                     complete(true);
                 }
             };

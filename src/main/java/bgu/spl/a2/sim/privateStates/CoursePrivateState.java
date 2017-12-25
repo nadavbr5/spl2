@@ -58,7 +58,7 @@ public class CoursePrivateState extends PrivateState {
 
     public boolean registerStudent(String student) {
         if(availableSpots > 0) {
-            boolean added = regStudents.add(student);
+            boolean added = !regStudents.contains(student) && regStudents.add(student);
             if (added) {
                 --this.availableSpots;
                 ++this.registered;
